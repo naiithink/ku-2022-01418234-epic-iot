@@ -1,0 +1,19 @@
+*               text=auto
+
+# Binaries
+*.7z            -text -diff
+*.bmp           -text -diff
+*.HEIC          -text -diff
+*.jpg           -text -diff
+*.jpeg          -text -diff
+*.pdf           -text -diff
+*.png           -text -diff
+*.tar           -text -diff
+*.zip           -text -diff
+
+# LF
+*.sh            text eol=lf
+
+# CRLF
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
