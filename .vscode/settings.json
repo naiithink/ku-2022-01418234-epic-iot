@@ -1,7 +1,13 @@
 {
+    "files.associations": {
+        "*.ino": "arduino"
+    },
+
     "arduino.useArduinoCli": true,
-    "arduino.path": "/opt/homebrew/bin/",
+    "arduino.path": "/opt/homebrew/bin",
+    // "arduino.path": "C:\\Program Files\\Arduino CLI",
     "arduino.commandPath": "arduino-cli",
+    // "arduino.commandPath": "arduino-cli.exe",
     "arduino.logLevel": "info",
     "arduino.allowPDEFiletype": false,
     "arduino.enableUSBDetection": true,
