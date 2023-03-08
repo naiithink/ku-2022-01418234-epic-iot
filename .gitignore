@@ -1,4 +1,9 @@
 .venv
+
+# Arduino
+debug_custom.json
+debug.cfg
+debug.svd
 output
 
 ## VSCode
