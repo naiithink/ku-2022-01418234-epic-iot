@@ -13,10 +13,11 @@ void setup()
     Serial.begin(115200);
 
     // lcd.init();
+    lcd.init();
     // lcd.begin(16, 2);
-    lcd.begin(16,2);
+    // lcd.begin(16,2);
     lcd.backlight();
-
+    lcd.setCursor(0,0);
     // lcd.clear();
     // lcd.setCursor(0, 0);
     lcd.print("hello, world");
