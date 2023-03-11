@@ -9,7 +9,6 @@
  *************************************************/
 
 #ifndef PITCHES_H
-
 #define PITCHES_H
 
 #define NOTE_B0  31
