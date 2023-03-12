@@ -2,11 +2,10 @@
 
 #include "MusiciansMate.h"
 
-#define PIECE_TERMINATOR (int) 0
 
 void playTrack(uint8_t buzzerPin, track *piece, uint32_t tempo)
 {
-    Serial.println("Playing a track");
+    PRINT("Playing a track");
 
     track *head = piece;
 
@@ -17,4 +16,6 @@ void playTrack(uint8_t buzzerPin, track *piece, uint32_t tempo)
     }
 
     noTone(buzzerPin);
+
+    PRINT("Done playing track");
 }

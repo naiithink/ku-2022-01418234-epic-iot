@@ -6,7 +6,12 @@
 #include "Metronome.h"
 #include "Tuner.h"
 
+
 #define SEC_IN_MILLI (1000 * 60)
+#define PRINT(MSG) (Serial.printf("%s: %s\n", __func__, MSG))
+
+#define PIECE_TERMINATOR (int) 0
+
 
 typedef struct track
 {
@@ -14,6 +19,7 @@ typedef struct track
     unsigned long duration;
 }
 track;
+
 
 void playTrack(uint8_t, track *, uint32_t);
 

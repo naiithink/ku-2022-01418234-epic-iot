@@ -12,16 +12,36 @@ int musicToolsBuzzerPin = BUZZ_PIN;
 
 int joystickState;
 
+int cnt;
+
+int rnd;
+
+// track jingle[] = {
+//     { NOTE_DS7,     NOTE_DURATION },
+//     { NOTE_DS7,     NOTE_DURATION },
+//     { NOTE_DS7,     NOTE_DURATION },
+//     { NOTE_DS7,     NOTE_DURATION },
+//     { NOTE_CS7,     NOTE_DURATION },
+//     { NOTE_B6,      NOTE_DURATION },
+//     { NOTE_B6,      NOTE_DURATION },
+//     { 0,            0 }
+// };
+
 track jingle[] = {
-    { NOTE_DS7,     NOTE_DURATION },
-    { NOTE_DS7,     NOTE_DURATION },
-    { NOTE_DS7,     NOTE_DURATION },
-    { NOTE_DS7,     NOTE_DURATION },
-    { NOTE_CS7,     NOTE_DURATION },
-    { NOTE_B6,      NOTE_DURATION },
-    { NOTE_B6,      NOTE_DURATION },
+    { NOTE_G7,      NOTE_DURATION },
+    { NOTE_G7,      NOTE_DURATION },
+    { NOTE_G7,      NOTE_DURATION },
+    { NOTE_DS7,     7 * NOTE_DURATION },
+    { NOTE_F7,      NOTE_DURATION },
+    { NOTE_F7,      NOTE_DURATION },
+    { NOTE_F7,      NOTE_DURATION },
+    { NOTE_D7,      7 * NOTE_DURATION },
     { 0,            0 }
 };
+
+Metronome *metronome = new Metronome(BUZZ_PIN, NOTE_CS7, NOTE_DURATION, DEFAULT_TEMPO);
+
+// GuitarTuner *tuner = (GuitarTuner *) TunerBuilder::build(BUZZ_PIN, GUITAR, NOTE_DURATION);
 
 void setup()
 {
@@ -35,12 +55,36 @@ void setup()
     // Jingle
     playTrack(BUZZ_PIN, jingle, DEFAULT_TEMPO);
 
-    Serial.println(xPortGetCoreID());
+    metronome->start();
 }
 
 void loop()
 {
-    // tone(BUZZ_PIN, NOTE_C7, 100);
+    if (cnt >= 10 && rnd < 1)
+    {
+        metronome->setTempo(90);
+        cnt = 0;
+        metronome->start();
+        rnd++;
+    }
+    // else if (rnd < 2)
+    // {
+    //     int i = 0;
 
-    // delay((1000 * 60) / tempo);
+    //     while (tuner->playPitch(i++));
+
+    //     rnd++;
+    // }
+    else
+    {
+        while (true);
+    }
+}
+
+bool metronomeStopObserver()
+{
+    if (cnt++ < 10)
+        return true;
+    else
+        return false;
 }

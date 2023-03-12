@@ -1,6 +1,10 @@
 #ifndef METRONOME_H
 #define METRONOME_H
 
+
+extern bool metronomeStopObserver();
+
+
 class Metronome
 {
 public:
@@ -18,13 +22,17 @@ private:
     bool buttonHandler();
 
     uint8_t _buzzerPin;
+
     unsigned int tickNote;
-    unsigned long duration;
+
+    unsigned long tickDuration;
+
+    // The current metronome tempo
     uint32_t tempo;
+
+    // Current metronome state
+    // Set either by the external `metronomeStopObserver()' function or by the `Metronome::stop()' method
     bool isPlaying;
-    uint8_t joyStickButtonPin;
-    uint8_t joyStickXPin;
-    uint8_t joyStickYPin;
 };
 
 #endif /* METRONOME_H */
