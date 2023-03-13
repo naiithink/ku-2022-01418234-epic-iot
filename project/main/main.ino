@@ -97,6 +97,23 @@ void inputMonitorTask(void *param)
         Serial.printf("Y: %i\n", analogRead(A3));
         Serial.printf("B: %i\n", digitalRead(JOYSTICK_PIN));
 
+        if (metronome->getIsPlaying() == true)
+        {
+            uint16_t joystickX = analogRead(A0);
+            uint16_t joystickY = analogRead(A3);
+
+            if (joystickX == 0)
+            {
+                metronome->setTempo(metronome->getTempo() - 1);
+                delay(100);
+            }
+            else if (joystickX >= 4000)
+            {
+                metronome->setTempo(metronome->getTempo() + 1);
+                delay(100);
+            }
+        }
+
         if ((millis() - lastJoystickDebounceTime) < DEBOUNCE_DELAY)
             continue;
 
