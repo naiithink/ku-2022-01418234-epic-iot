@@ -12,6 +12,7 @@ void playTrack(uint8_t buzzerPin, track *piece, uint32_t tempo)
     while (head->note != PIECE_TERMINATOR && head->duration != PIECE_TERMINATOR)
     {
         tone(buzzerPin, head->note, head->duration);
+        delay(head->duration);
         head++;
     }
 
