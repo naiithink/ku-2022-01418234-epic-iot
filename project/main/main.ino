@@ -1,8 +1,5 @@
 #include <MusiciansMate.h>
 
-#include "src/Events.h"
-#include "Pitches.h"
-
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
 #define DEFAULT_TEMPO 120
@@ -19,10 +16,6 @@ int lastJoystickState = 1;
 unsigned long lastJoystickDebounceTime = millis();
 
 int metronomeState = -1;
-
-int cnt;
-
-int rnd;
 
 track jingle[] = {
     { NOTE_G7,      NOTE_DURATION },
