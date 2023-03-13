@@ -6,8 +6,6 @@
 
 Metronome::Metronome(uint8_t buzzerPin, unsigned int tickNote, unsigned long tickDuration, uint32_t tempo)
 {
-    pinMode(buzzerPin, OUTPUT);
-
     this->_buzzerPin = buzzerPin;
     this->tickNote = tickNote;
     this->tickDuration = tickDuration;
@@ -39,6 +37,12 @@ bool Metronome::start()
 bool Metronome::stop()
 {
     isPlaying = false;
+}
+
+
+bool Metronome::getIsPlaying()
+{
+    return this->isPlaying;
 }
 
 

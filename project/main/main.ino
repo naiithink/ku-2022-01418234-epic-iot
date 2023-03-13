@@ -1,5 +1,6 @@
 #include <MusiciansMate.h>
 
+#include "src/Events.h"
 #include "Pitches.h"
 
 #define BUZZ_PIN 17
@@ -9,24 +10,19 @@
 #define NOTE_DURATION (1000 * 1 * 0.18)
 #define TUNER_DURATION (1000)
 
-int musicToolsBuzzerPin = BUZZ_PIN;
+#define DEBOUNCE_DELAY (unsigned long) 50
+
+TaskHandle_t InputMonitor;
 
 int joystickState;
+int lastJoystickState = 1;
+unsigned long lastJoystickDebounceTime = millis();
+
+int metronomeState = -1;
 
 int cnt;
 
 int rnd;
-
-// track jingle[] = {
-//     { NOTE_DS7,     NOTE_DURATION },
-//     { NOTE_DS7,     NOTE_DURATION },
-//     { NOTE_DS7,     NOTE_DURATION },
-//     { NOTE_DS7,     NOTE_DURATION },
-//     { NOTE_CS7,     NOTE_DURATION },
-//     { NOTE_B6,      NOTE_DURATION },
-//     { NOTE_B6,      NOTE_DURATION },
-//     { 0,            0 }
-// };
 
 track jingle[] = {
     { NOTE_G7,      NOTE_DURATION },
@@ -49,43 +45,70 @@ void setup()
     Serial.begin(115200);
 
     pinMode(BUZZ_PIN, OUTPUT);
-    // pinMode(JOYSTICK_PIN, INPUT_PULLUP);
-
-    Serial.println("Done setup");
+    pinMode(JOYSTICK_PIN, INPUT_PULLUP);
 
     // Jingle
     playTrack(BUZZ_PIN, jingle, DEFAULT_TEMPO);
 
+    xTaskCreatePinnedToCore(
+        inputMonitorTask,
+        "inputMonitor",
+        2048,
+        NULL,
+        1,
+        &InputMonitor,
+        0
+    );
+
+    Serial.println("Done setup");
+
     metronome->start();
+    metronomeState = metronome->getIsPlaying() == true  ? 1
+                                                        : -1;
 }
 
 void loop()
 {
-    if (cnt >= 9 && rnd < 1)
-    {
-        metronome->setTempo(90);
-        cnt = 0;
+    if (metronome->getIsPlaying() == false && metronomeState > 0)
         metronome->start();
-        rnd++;
-    }
-    else if (rnd < 2)
-    {
-        int i = 0;
-
-        while (tuner->playPitch(i++));
-
-        rnd++;
-    }
-    else
-    {
-        while (true);
-    }
 }
 
 bool metronomeStopObserver()
 {
-    if (cnt++ < 10)
+    if (metronomeState > 0)
         return true;
     else
         return false;
+}
+
+void toggleMetronomeState()
+{
+    Serial.println(metronomeState);
+    metronomeState *= -1;
+}
+
+void inputMonitorTask(void *param)
+{
+    while (true)
+    {
+        vTaskDelay(10);
+
+        Serial.printf("X: %i\n", analogRead(A0));
+        Serial.printf("Y: %i\n", analogRead(A3));
+        Serial.printf("B: %i\n", digitalRead(JOYSTICK_PIN));
+
+        if ((millis() - lastJoystickDebounceTime) < DEBOUNCE_DELAY)
+            continue;
+
+        joystickState = digitalRead(JOYSTICK_PIN);
+
+        if (joystickState != lastJoystickState)
+        {
+            lastJoystickDebounceTime = millis();
+            lastJoystickState = joystickState;
+
+            if (joystickState == 1)
+                toggleMetronomeState();
+        }
+    }
 }

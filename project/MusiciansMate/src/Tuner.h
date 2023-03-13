@@ -4,7 +4,8 @@
 typedef enum
 {
     GUITAR = 1
-} instrument;
+}
+instrument;
 
 
 class Tuner
@@ -13,7 +14,7 @@ public:
     virtual bool playPitch(const int);
 
 protected:
-    explicit Tuner(uint8_t,  unsigned long);
+    explicit Tuner(uint8_t, unsigned long);
 
     uint8_t _buzzerPin;
 
@@ -40,10 +41,9 @@ private:
 class GuitarTuner : protected Tuner
 {
 public:
-    bool playPitch(const int);
-
-protected:
     explicit GuitarTuner(uint8_t, unsigned long);
+
+    bool playPitch(const int);
 };
 
 

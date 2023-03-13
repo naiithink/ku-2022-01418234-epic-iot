@@ -14,13 +14,13 @@ public:
 
     bool stop();
 
-    void setTempo(int);
+    bool getIsPlaying();
 
     int getTempo();
 
-private:
-    bool buttonHandler();
+    void setTempo(int);
 
+private:
     uint8_t _buzzerPin;
 
     unsigned int tickNote;

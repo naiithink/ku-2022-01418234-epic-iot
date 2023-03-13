@@ -12,12 +12,10 @@ Tuner::Tuner(uint8_t buzzerPin, unsigned long playDuration)
 }
 
 
-GuitarTuner::GuitarTuner(uint8_t _buzzerPin, unsigned long playDuration)
-: Tuner::Tuner(_buzzerPin, playDuration)
+GuitarTuner::GuitarTuner(uint8_t buzzerPin, unsigned long playDuration)
+: Tuner::Tuner(buzzerPin, playDuration)
 {
-    // pinMode(_buzzerPin, OUTPUT);
-
-    this->_buzzerPin = _buzzerPin;
+    this->_buzzerPin = buzzerPin;
     this->type = GUITAR;
     this->pitchCount = 6;
     this->playDuration = playDuration;
@@ -40,6 +38,8 @@ GuitarTuner::GuitarTuner(uint8_t _buzzerPin, unsigned long playDuration)
 
 bool GuitarTuner::playPitch(const int index)
 {
+    PRINT("Playing pitch");
+
     if (index < 0 || index > pitchCount)
     {
         PRINT("Pitch index out of range");
@@ -48,6 +48,9 @@ bool GuitarTuner::playPitch(const int index)
 
     tone(_buzzerPin, pitches[index], playDuration);
     delay(playDuration);
+
+    PRINT("Done playing pitch");
+
     noTone(_buzzerPin);
 
     return true;
