@@ -30,3 +30,8 @@ An IoT Project
 
 ให้แก้ไขไฟล์ใน `Arduino/libraries/MusiciansMate/` บนคอมพิวเตอร์ของเรา  
 เมื่อแก้ไขเสร็จ ให้คัดลอก `Arduino/libraries/MusiciansMate/` ทั้งโฟล์เดอร์ มาวางทับ [`project/MusiciansMate/`](MusiciansMate) แล้ว commit > push
+
+
+## Pin Layout
+
+![pin-layout.png](pin-layout.png)
