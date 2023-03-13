@@ -4,5 +4,5 @@ playTrack	KEYWORD2
 Metronome	KEYWORD1
 start	KEYWORD2
 stop	KEYWORD2
-setTempo	KEYWORD2
 getTempo	KEYWORD2
+setTempo	KEYWORD2

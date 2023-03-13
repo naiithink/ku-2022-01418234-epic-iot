@@ -42,13 +42,13 @@ bool Metronome::stop()
 }
 
 
-void Metronome::setTempo(int newTempo)
-{
-    this->tempo = newTempo;
-}
-
-
 int Metronome::getTempo()
 {
     return this->tempo;
+}
+
+
+void Metronome::setTempo(int newTempo)
+{
+    this->tempo = newTempo;
 }
