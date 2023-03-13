@@ -5,20 +5,10 @@
 #include "Tuner.h"
 
 
-Tuner *TunerBuilder::build(uint8_t _buzzerPin, instrument type, unsigned long playDuration)
+Tuner::Tuner(uint8_t buzzerPin, unsigned long playDuration)
 {
-    Tuner *tuner;
-
-    switch (type)
-    {
-        case GUITAR:
-
-        default:
-            PRINT("Unknown instrument");
-            tuner = NULL;
-    }
-
-    return tuner;
+    this->_buzzerPin = buzzerPin;
+    this->playDuration = playDuration;
 }
 
 
@@ -32,12 +22,18 @@ GuitarTuner::GuitarTuner(uint8_t _buzzerPin, unsigned long playDuration)
     this->pitchCount = 6;
     this->playDuration = playDuration;
     this->pitches = new int[pitchCount] {
-        NOTE_E2,
-        NOTE_A2,
-        NOTE_D3,
-        NOTE_G3,
-        NOTE_B3,
-        NOTE_E4
+        // NOTE_E2,
+        // NOTE_A2,
+        // NOTE_D3,
+        // NOTE_G3,
+        // NOTE_B3,
+        // NOTE_E4
+        NOTE_E5,
+        NOTE_A5,
+        NOTE_D6,
+        NOTE_G6,
+        NOTE_B6,
+        NOTE_E7
     };
 }
 
@@ -51,7 +47,24 @@ bool GuitarTuner::playPitch(const int index)
     }
 
     tone(_buzzerPin, pitches[index], playDuration);
+    delay(playDuration);
     noTone(_buzzerPin);
 
     return true;
+}
+
+Tuner *TunerBuilder::build(uint8_t buzzerPin, instrument type, unsigned long playDuration)
+{
+    Tuner *tuner;
+
+    switch (type)
+    {
+        case GUITAR:
+            tuner = (Tuner *) new GuitarTuner(buzzerPin, playDuration);
+            break;
+        default:
+            PRINT("Unknown instrument");
+    }
+
+    return tuner;
 }

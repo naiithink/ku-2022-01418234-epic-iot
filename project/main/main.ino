@@ -7,6 +7,7 @@
 #define DEFAULT_TEMPO 120
 
 #define NOTE_DURATION (1000 * 1 * 0.18)
+#define TUNER_DURATION (1000)
 
 int musicToolsBuzzerPin = BUZZ_PIN;
 
@@ -39,9 +40,9 @@ track jingle[] = {
     { 0,            0 }
 };
 
-Metronome *metronome = new Metronome(BUZZ_PIN, NOTE_CS7, NOTE_DURATION, DEFAULT_TEMPO);
+Metronome *metronome = new Metronome(BUZZ_PIN, NOTE_F7, NOTE_DURATION, DEFAULT_TEMPO);
 
-// GuitarTuner *tuner = (GuitarTuner *) TunerBuilder::build(BUZZ_PIN, GUITAR, NOTE_DURATION);
+GuitarTuner *tuner = (GuitarTuner *) TunerBuilder::build(BUZZ_PIN, GUITAR, TUNER_DURATION);
 
 void setup()
 {
@@ -60,21 +61,21 @@ void setup()
 
 void loop()
 {
-    if (cnt >= 10 && rnd < 1)
+    if (cnt >= 9 && rnd < 1)
     {
         metronome->setTempo(90);
         cnt = 0;
         metronome->start();
         rnd++;
     }
-    // else if (rnd < 2)
-    // {
-    //     int i = 0;
+    else if (rnd < 2)
+    {
+        int i = 0;
 
-    //     while (tuner->playPitch(i++));
+        while (tuner->playPitch(i++));
 
-    //     rnd++;
-    // }
+        rnd++;
+    }
     else
     {
         while (true);
