@@ -104,13 +104,15 @@ void inputMonitorTask(void *param)
 
             if (joystickX == 0)
             {
+                Serial.printf("Metronome tempo --: %d\n", metronome->getTempo());
                 metronome->setTempo(metronome->getTempo() - 1);
-                delay(100);
+                delay(200);
             }
             else if (joystickX >= 4000)
             {
+                Serial.printf("Metronome tempo ++: %d\n", metronome->getTempo());
                 metronome->setTempo(metronome->getTempo() + 1);
-                delay(100);
+                delay(200);
             }
         }
 
