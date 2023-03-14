@@ -7,16 +7,6 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 // LiquidCrystal_I2C lcd(0x27,22,21);
-byte Heart[8] = {
-0b00000,
-0b01010,
-0b11111,
-0b11111,
-0b01110,
-0b00100,
-0b00000,
-0b00000
-};
 
 void setup()
 {
@@ -30,15 +20,30 @@ void setup()
 	// create a new character
 	lcd.createChar(0, Heart);
     lcd.backlight();
-    lcd.setCursor(0,0);
+    // create a new character
+	// lcd.createChar(0, Heart);
+    // lcd.setCursor(0,1);
     // lcd.clear();
     // lcd.setCursor(0, 0);
-    // lcd.print("hello, world");
-    // lcd.home();
-    lcd.write(byte(0));
-    // lcd.write(0);
-    lcd.setCursor(0,1);
-    lcd.print("goodgame");
+    // lcd.write(byte(0));
+    lcd.setCursor(0,0);
+    lcd.print("E");
+    lcd.setCursor(3,0);
+    lcd.print("A");
+    lcd.setCursor(6,0);
+    lcd.print("D");
+    lcd.setCursor(9,0);
+    lcd.print("G");
+    lcd.setCursor(12,0);
+    lcd.print("B");
+    lcd.setCursor(15,0);
+    lcd.print("E");
+        // NOTE_E2,
+        // NOTE_A2,
+        // NOTE_D3,
+        // NOTE_G3,
+        // NOTE_B3,
+        // NOTE_E4
 }
 
 void loop()
