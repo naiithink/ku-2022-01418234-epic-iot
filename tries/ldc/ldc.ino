@@ -15,35 +15,14 @@ void setup()
     // lcd.init();
     lcd.init();
     // lcd.begin(16, 2);
-    lcd.begin(16, 2);
-
-	// create a new character
-	lcd.createChar(0, Heart);
+    // lcd.begin(16,2);
     lcd.backlight();
-    // create a new character
-	// lcd.createChar(0, Heart);
-    // lcd.setCursor(0,1);
+    lcd.setCursor(0,0);
     // lcd.clear();
     // lcd.setCursor(0, 0);
-    // lcd.write(byte(0));
-    lcd.setCursor(0,0);
-    lcd.print("E");
-    lcd.setCursor(3,0);
-    lcd.print("A");
-    lcd.setCursor(6,0);
-    lcd.print("D");
-    lcd.setCursor(9,0);
-    lcd.print("G");
-    lcd.setCursor(12,0);
-    lcd.print("B");
-    lcd.setCursor(15,0);
-    lcd.print("E");
-        // NOTE_E2,
-        // NOTE_A2,
-        // NOTE_D3,
-        // NOTE_G3,
-        // NOTE_B3,
-        // NOTE_E4
+    lcd.print("hello, world");
+    lcd.setCursor(0,1);
+    lcd.print("goodgame");
 }
 
 void loop()
