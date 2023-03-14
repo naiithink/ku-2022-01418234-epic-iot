@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "Metronome.h"
+#include "Pitches.h"
 #include "Tuner.h"
 
 
