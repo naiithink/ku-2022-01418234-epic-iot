@@ -2,6 +2,17 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+/* Fill-in information from Blynk Device Info here */
+#define BLYNK_TEMPLATE_ID "TMPLAllvhdfB"
+#define BLYNK_TEMPLATE_NAME "Quickstart Template"
+#define BLYNK_AUTH_TOKEN "3_95z6wnvK7gr9qP2j72ZGALA3osxOTt"
+
+/* Comment this out to disable prints and save space */
+#define BLYNK_PRINT Serial
+
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
 #define DEFAULT_TEMPO 120
@@ -85,6 +96,7 @@ GuitarTuner *tuner = (GuitarTuner *)TunerBuilder::build(BUZZ_PIN, GUITAR, TUNER_
 
 void setup()
 {
+    // Debug console
     Serial.begin(115200);
 
     Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
@@ -123,7 +135,7 @@ void setup()
 
 void loop()
 {
-    if (metronome->getIsPlaying() == false && metronomeState > 0 && pageState < 0)
+    if (metronome->getIsPlaying() == false && metronomeState > 0 && pageState == -1)
         metronome->start();
     // else if(pageState > 0){
     // }
@@ -239,17 +251,18 @@ void inputMonitorTask(void *param)
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("E");
-                lcd.setCursor(3, 0);
+                lcd.setCursor(2, 0);
                 lcd.print("A");
-                lcd.setCursor(6, 0);
+                lcd.setCursor(4, 0);
                 lcd.print("D");
-                lcd.setCursor(9, 0);
+                lcd.setCursor(6, 0);
                 lcd.print("G");
-                lcd.setCursor(12, 0);
+                lcd.setCursor(8, 0);
                 lcd.print("B");
-                lcd.setCursor(15, 0);
+                lcd.setCursor(9, 0);
                 lcd.print("E");
                 pageState *= -1;
+                stageJuner();
             }
         }
 
@@ -265,6 +278,44 @@ void inputMonitorTask(void *param)
 
             if (joystickState == 1)
                 toggleMetronomeState();
+        }
+    }
+}
+
+void stageJuner()
+{
+    while (true)
+    {
+        uint16_t joystickX = analogRead(A0);
+
+        if(joystickX )
+
+        // lcd.clear();
+        // lcd.setCursor(0, 0);
+        // lcd.print("E");
+        // lcd.setCursor(2, 0);
+        // lcd.print("A");
+        // lcd.setCursor(4, 0);
+        // lcd.print("D");
+        // lcd.setCursor(6, 0);
+        // lcd.print("G");
+        // lcd.setCursor(8, 0);
+        // lcd.print("B");
+        // lcd.setCursor(9, 0);
+        // lcd.print("E");
+
+        if ((millis() - lastJoystickDebounceTime) < DEBOUNCE_DELAY)
+            continue;
+
+        joystickState = digitalRead(JOYSTICK_PIN);
+
+        if (joystickState != lastJoystickState)
+        {
+            lastJoystickDebounceTime = millis();
+            lastJoystickState = joystickState;
+
+            if (joystickState == 1)
+                break;
         }
     }
 }
