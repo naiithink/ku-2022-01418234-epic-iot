@@ -49,7 +49,7 @@ BLYNK_WRITE(V0)
   int value = param.asInt();
 
   // Update state
-  Blynk.virtualWrite(V1, value);
+  Blynk.virtualWrite(V0, value);
 }
 
 // This function is called every time the device is connected to the Blynk.Cloud

@@ -34,4 +34,4 @@ An IoT Project
 
 ## Pin Layout
 
-![pin-layout.png](pin-layout.png)
+![pin-layout](images/2023-03-14_pin-layout.png)
