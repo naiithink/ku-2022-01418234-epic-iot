@@ -4,7 +4,7 @@ URL = "http://192.168.4.1/"
 DATA = "Hello, ESP32!"
 
 WIFI_SSID = "NAI"
-WIFI_PASS = "epic_iot1"
+WIFI_PASS = "epic_iot555"
 
 HEADERS = {
     "ssid": WIFI_SSID,

@@ -11,8 +11,8 @@
 const char reqHeaderSSID[] = "ssid";
 const char reqHeaderPASS[] = "pass";
 
-const String iftttToken = "DgNT6OXwf1AkGVBhXINwA";
-const String iftttEvent = "gmail_callback";
+const String iftttToken = "<IFTTT TOKEN>";
+const String iftttEvent = "<IFTTT EVENT>";
 
 WiFiServer server(80);
 Preferences pref;
