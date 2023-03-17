@@ -1,0 +1,35 @@
+// Storing data to flash memory
+#include <WiFi.h>
+
+// Preferences(esp32) Built-In
+#include <Preferences.h>
+
+#define KEY "abc"
+
+Preferences preferences;
+
+void setup()
+{
+    Serial.begin(115200);
+
+    // bool Preferences::begin(const char * name, bool readOnly, const char* partition_label);
+    preferences.begin("myApp", false);
+
+    // String Preferences::getString(const char* key, const String defaultValue);
+    if (preferences.getString(KEY, "") == "")
+    {
+        Serial.println("no key");
+
+        // size_t Preferences::putString(const char* key, const char* value);
+        preferences.putString(KEY, "def");
+    }
+    else
+    {
+        // String Preferences::getString(const char* key, const String defaultValue);
+        Serial.println(preferences.getString(KEY));
+    }
+}
+
+void loop()
+{
+}
