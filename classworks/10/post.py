@@ -3,8 +3,8 @@ import requests
 URL = "http://192.168.4.1/"
 DATA = "Hello, ESP32!"
 
-WIFI_SSID = "Epic IoT"
-WIFI_PASS = "epic_iot"
+WIFI_SSID = "NAI"
+WIFI_PASS = "epic_iot1"
 
 HEADERS = {
     "ssid": WIFI_SSID,
