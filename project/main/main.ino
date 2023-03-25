@@ -3,16 +3,16 @@
 #include <LiquidCrystal_I2C.h>
 
 /* Fill-in information from Blynk Device Info here */
-#define BLYNK_TEMPLATE_ID "TMPLAllvhdfB"
-#define BLYNK_TEMPLATE_NAME "Quickstart Template"
-#define BLYNK_AUTH_TOKEN "3_95z6wnvK7gr9qP2j72ZGALA3osxOTt"
+// #define BLYNK_TEMPLATE_ID "TMPLAllvhdfB"
+// #define BLYNK_TEMPLATE_NAME "Quickstart Template"
+// #define BLYNK_AUTH_TOKEN "3_95z6wnvK7gr9qP2j72ZGALA3osxOTt"
 
 /* Comment this out to disable prints and save space */
-#define BLYNK_PRINT Serial
+// #define BLYNK_PRINT Serial
 
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <BlynkSimpleEsp32.h>
+// #include <WiFi.h>
+// #include <WiFiClient.h>
+// #include <BlynkSimpleEsp32.h>
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
 #define DEFAULT_TEMPO 120
@@ -23,51 +23,51 @@
 #define DEBOUNCE_DELAY (unsigned long)50
 
 /* Fill-in information from Blynk Device Info here */
-#define BLYNK_TEMPLATE_ID           "TMPLAllvhdfB"
-#define BLYNK_TEMPLATE_NAME         "Quickstart Template"
-#define BLYNK_AUTH_TOKEN            "5POv9m3yhuUfPJcbNCP7wKGqPeclDuUY"
+// #define BLYNK_TEMPLATE_ID           "TMPLAllvhdfB"
+// #define BLYNK_TEMPLATE_NAME         "Quickstart Template"
+// #define BLYNK_AUTH_TOKEN            "5POv9m3yhuUfPJcbNCP7wKGqPeclDuUY"
 
-/* Comment this out to disable prints and save space */
-#define BLYNK_PRINT Serial
+// /* Comment this out to disable prints and save space */
+// #define BLYNK_PRINT Serial
 
 
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <BlynkSimpleEsp32.h>
+// #include <WiFi.h>
+// #include <WiFiClient.h>
+// #include <BlynkSimpleEsp32.h>
 
-// Your WiFi credentials.
-// Set password to "" for open networks.
-char ssid[] = "TEE";
-char pass[] = "Tee00000";
+// // Your WiFi credentials.
+// // Set password to "" for open networks.
+// char ssid[] = "TEE";
+// char pass[] = "Tee00000";
 
-BlynkTimer timer;
+// // BlynkTimer timer;
 
-// This function is called every time the Virtual Pin 0 state changes
-BLYNK_WRITE(V0)
-{
-  // Set incoming value from pin V0 to a variable
-  int value = param.asInt();
+// // This function is called every time the Virtual Pin 0 state changes
+// BLYNK_WRITE(V0)
+// {
+//   // Set incoming value from pin V0 to a variable
+//   int value = param.asInt();
 
-  // Update state
-  Blynk.virtualWrite(V0, value);
-}
+//   // Update state
+//   Blynk.virtualWrite(V0, value);
+// }
 
-// This function is called every time the device is connected to the Blynk.Cloud
-BLYNK_CONNECTED()
-{
-  // Change Web Link Button message to "Congratulations!"
-  Blynk.setProperty(V3, "offImageUrl", "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations.png");
-  Blynk.setProperty(V3, "onImageUrl",  "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations_pressed.png");
-  Blynk.setProperty(V3, "url", "https://docs.blynk.io/en/getting-started/what-do-i-need-to-blynk/how-quickstart-device-was-made");
-}
+// // This function is called every time the device is connected to the Blynk.Cloud
+// BLYNK_CONNECTED()
+// {
+//   // Change Web Link Button message to "Congratulations!"
+//   Blynk.setProperty(V3, "offImageUrl", "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations.png");
+//   Blynk.setProperty(V3, "onImageUrl",  "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations_pressed.png");
+//   Blynk.setProperty(V3, "url", "https://docs.blynk.io/en/getting-started/what-do-i-need-to-blynk/how-quickstart-device-was-made");
+// }
 
-// This function sends Arduino's uptime every second to Virtual Pin 2.
-void myTimerEvent()
-{
-  // You can send any value at any time.
-  // Please don't send more that 10 values per second.
-  Blynk.virtualWrite(V2, millis() / 1000);
-}
+// // This function sends Arduino's uptime every second to Virtual Pin 2.
+// void myTimerEvent()
+// {
+//   // You can send any value at any time.
+//   // Please don't send more that 10 values per second.
+//   Blynk.virtualWrite(V2, millis() / 1000);
+// }
 
 TaskHandle_t InputMonitor;
 LiquidCrystal_I2C lcd(0x27, 16, 1);
@@ -78,6 +78,7 @@ unsigned long lastJoystickDebounceTime = millis();
 
 int metronomeState = -1;
 int pageState = -1;
+int numArrowTuner = 1;
 
 track jingle[] = {
     {NOTE_G7, NOTE_DURATION},
@@ -99,13 +100,13 @@ void setup()
     // Debug console
     Serial.begin(115200);
 
-    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+    // Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
   // You can also specify server:
   //Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, "blynk.cloud", 80);
   //Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, IPAddress(192,168,1,100), 8080);
 
   // Setup a function to be called every second
-    timer.setInterval(1000L, myTimerEvent);
+    // timer.setInterval(1000L, myTimerEvent);
 
     pinMode(BUZZ_PIN, OUTPUT);
     pinMode(JOYSTICK_PIN, INPUT_PULLUP);
@@ -139,8 +140,8 @@ void loop()
         metronome->start();
     // else if(pageState > 0){
     // }
-    Blynk.run();
-    timer.run();
+    // Blynk.run();
+    // timer.run();
   // You can inject your own code or combine it with other sketches.
   // Check other examples on how to communicate with Blynk. Remember
   // to avoid delay() function!
@@ -248,9 +249,12 @@ void inputMonitorTask(void *param)
             }
             else if (joystickY >= 4000 && pageState == -1)
             {
+                numArrowTuner = 1;
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("E");
+                lcd.setCursor(numArrowTuner,0);
+                lcd.print("<");
                 lcd.setCursor(2, 0);
                 lcd.print("A");
                 lcd.setCursor(4, 0);
@@ -259,10 +263,51 @@ void inputMonitorTask(void *param)
                 lcd.print("G");
                 lcd.setCursor(8, 0);
                 lcd.print("B");
-                lcd.setCursor(9, 0);
+                lcd.setCursor(10, 0);
                 lcd.print("E");
                 pageState *= -1;
-                stageJuner();
+            }
+            else if(joystickX == 0 && pageState == 1){
+                numArrowTuner -= 2;
+                if(numArrowTuner <= 1){
+                    numArrowTuner = 1;
+                }
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("E");
+                lcd.setCursor(numArrowTuner,0);
+                lcd.print("<");
+                lcd.setCursor(2, 0);
+                lcd.print("A");
+                lcd.setCursor(4, 0);
+                lcd.print("D");
+                lcd.setCursor(6, 0);
+                lcd.print("G");
+                lcd.setCursor(8, 0);
+                lcd.print("B");
+                lcd.setCursor(10, 0);
+                lcd.print("E");
+            }
+            else if(joystickY >= 4000 && pageState == 1){
+                numArrowTuner += 2;
+                if(numArrowTuner >= 11){
+                    numArrowTuner = 11;
+                }
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("E");
+                lcd.setCursor(numArrowTuner,0);
+                lcd.print("<");
+                lcd.setCursor(2, 0);
+                lcd.print("A");
+                lcd.setCursor(4, 0);
+                lcd.print("D");
+                lcd.setCursor(6, 0);
+                lcd.print("G");
+                lcd.setCursor(8, 0);
+                lcd.print("B");
+                lcd.setCursor(10, 0);
+                lcd.print("E");
             }
         }
 
@@ -276,46 +321,34 @@ void inputMonitorTask(void *param)
             lastJoystickDebounceTime = millis();
             lastJoystickState = joystickState;
 
-            if (joystickState == 1)
+            if (joystickState == 1 && pageState == -1)
                 toggleMetronomeState();
-        }
-    }
-}
-
-void stageJuner()
-{
-    while (true)
-    {
-        uint16_t joystickX = analogRead(A0);
-
-        if(joystickX )
-
-        // lcd.clear();
-        // lcd.setCursor(0, 0);
-        // lcd.print("E");
-        // lcd.setCursor(2, 0);
-        // lcd.print("A");
-        // lcd.setCursor(4, 0);
-        // lcd.print("D");
-        // lcd.setCursor(6, 0);
-        // lcd.print("G");
-        // lcd.setCursor(8, 0);
-        // lcd.print("B");
-        // lcd.setCursor(9, 0);
-        // lcd.print("E");
-
-        if ((millis() - lastJoystickDebounceTime) < DEBOUNCE_DELAY)
-            continue;
-
-        joystickState = digitalRead(JOYSTICK_PIN);
-
-        if (joystickState != lastJoystickState)
-        {
-            lastJoystickDebounceTime = millis();
-            lastJoystickState = joystickState;
-
-            if (joystickState == 1)
-                break;
+            else if(joystickState == 1 && pageState == 1){
+                //ให้เรียกใช้Tuner ตาม numArrowTuner ที่ชี้อยู่
+                if(numArrowTuner == 1){
+                    /* code */
+                }
+                else if (numArrowTuner == 3)
+                {
+                    /* code */
+                }
+                else if (numArrowTuner == 5)
+                {
+                    /* code */
+                }
+                else if (numArrowTuner == 7)
+                {
+                    /* code */
+                }
+                else if (numArrowTuner == 9)
+                {
+                    /* code */
+                }
+                else if (numArrowTuner == 11)
+                {
+                    /* code */
+                }
+            }
         }
     }
 }
