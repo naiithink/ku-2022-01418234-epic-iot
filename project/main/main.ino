@@ -1,18 +1,9 @@
+#include "thingProperties.h"
+
 #include <MusiciansMate.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-/* Fill-in information from Blynk Device Info here */
-// #define BLYNK_TEMPLATE_ID "TMPLAllvhdfB"
-// #define BLYNK_TEMPLATE_NAME "Quickstart Template"
-// #define BLYNK_AUTH_TOKEN "3_95z6wnvK7gr9qP2j72ZGALA3osxOTt"
-
-/* Comment this out to disable prints and save space */
-// #define BLYNK_PRINT Serial
-
-// #include <WiFi.h>
-// #include <WiFiClient.h>
-// #include <BlynkSimpleEsp32.h>
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
 #define DEFAULT_TEMPO 120
@@ -22,55 +13,10 @@
 
 #define DEBOUNCE_DELAY (unsigned long)50
 
-/* Fill-in information from Blynk Device Info here */
-// #define BLYNK_TEMPLATE_ID           "TMPLAllvhdfB"
-// #define BLYNK_TEMPLATE_NAME         "Quickstart Template"
-// #define BLYNK_AUTH_TOKEN            "5POv9m3yhuUfPJcbNCP7wKGqPeclDuUY"
-
-// /* Comment this out to disable prints and save space */
-// #define BLYNK_PRINT Serial
-
-
-// #include <WiFi.h>
-// #include <WiFiClient.h>
-// #include <BlynkSimpleEsp32.h>
-
-// // Your WiFi credentials.
-// // Set password to "" for open networks.
-// char ssid[] = "TEE";
-// char pass[] = "Tee00000";
-
-// // BlynkTimer timer;
-
-// // This function is called every time the Virtual Pin 0 state changes
-// BLYNK_WRITE(V0)
-// {
-//   // Set incoming value from pin V0 to a variable
-//   int value = param.asInt();
-
-//   // Update state
-//   Blynk.virtualWrite(V0, value);
-// }
-
-// // This function is called every time the device is connected to the Blynk.Cloud
-// BLYNK_CONNECTED()
-// {
-//   // Change Web Link Button message to "Congratulations!"
-//   Blynk.setProperty(V3, "offImageUrl", "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations.png");
-//   Blynk.setProperty(V3, "onImageUrl",  "https://static-image.nyc3.cdn.digitaloceanspaces.com/general/fte/congratulations_pressed.png");
-//   Blynk.setProperty(V3, "url", "https://docs.blynk.io/en/getting-started/what-do-i-need-to-blynk/how-quickstart-device-was-made");
-// }
-
-// // This function sends Arduino's uptime every second to Virtual Pin 2.
-// void myTimerEvent()
-// {
-//   // You can send any value at any time.
-//   // Please don't send more that 10 values per second.
-//   Blynk.virtualWrite(V2, millis() / 1000);
-// }
-
 TaskHandle_t InputMonitor;
 LiquidCrystal_I2C lcd(0x27, 16, 1);
+
+bool cloudSetupDone = false;
 
 int joystickState;
 int lastJoystickState = 1;
@@ -101,19 +47,21 @@ GuitarTuner *tuner = (GuitarTuner *)TunerBuilder::build(BUZZ_PIN, GUITAR, TUNER_
 
 void setup()
 {
-    // Debug console
-    Serial.begin(115200);
-
-    // Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
-  // You can also specify server:
-  //Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, "blynk.cloud", 80);
-  //Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, IPAddress(192,168,1,100), 8080);
-
-  // Setup a function to be called every second
-    // timer.setInterval(1000L, myTimerEvent);
-
     pinMode(BUZZ_PIN, OUTPUT);
     pinMode(JOYSTICK_PIN, INPUT_PULLUP);
+
+    // Debug console
+    Serial.begin(115200);
+    // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
+    delay(1500);
+
+    initProperties();
+
+    // Connect to Arduino IoT Cloud
+    ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+
+    cloudSetupDone = true;
+
     lcd.init();
     lcd.backlight();
     lcd.setCursor(0, 0);
@@ -140,15 +88,11 @@ void setup()
 
 void loop()
 {
+    if (cloudSetupDone)
+        ArduinoCloud.update();
+
     if (metronome->getIsPlaying() == false && metronomeState > 0 && pageState == -1)
         metronome->start();
-    // else if(pageState > 0){
-    // }
-    // Blynk.run();
-    // timer.run();
-  // You can inject your own code or combine it with other sketches.
-  // Check other examples on how to communicate with Blynk. Remember
-  // to avoid delay() function!
 }
 
 bool metronomeStopObserver()
@@ -181,17 +125,14 @@ bool metronomeStopObserver()
     }
 }
 
-void toggleMetronomeState()
-{
-    Serial.println(metronomeState);
-    metronomeState *= -1;
-}
-
 void inputMonitorTask(void *param)
 {
     while (true)
     {
         vTaskDelay(10);
+
+        if (cloudSetupDone)
+            ArduinoCloud.update();
 
         Serial.printf("X: %i\n", analogRead(A0));
         Serial.printf("Y: %i\n", analogRead(A3));
@@ -204,33 +145,11 @@ void inputMonitorTask(void *param)
 
             if (joystickX == 0)
             {
-                metronome->setTempo(metronome->getTempo() - 1);
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("[");
-                lcd.setCursor(1, 0);
-                lcd.print(metronome->getTempo());
-                lcd.setCursor(4, 0);
-                lcd.print("]");
-                lcd.setCursor(6, 0);
-                lcd.print("PLAYING");
-                delay(543);
-                Serial.printf("Metronome tempo --: %d\n", metronome->getTempo());
+                decreaseMetronomeTempo();
             }
             else if (joystickX >= 4000)
             {
-                metronome->setTempo(metronome->getTempo() + 1);
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("[");
-                lcd.setCursor(1, 0);
-                lcd.print(metronome->getTempo());
-                lcd.setCursor(4, 0);
-                lcd.print("]");
-                lcd.setCursor(6, 0);
-                lcd.print("PLAYING");
-                delay(543);
-                Serial.printf("Metronome tempo ++: %d\n", metronome->getTempo());
+                increaseMetronomeTempo();
             }
         }
         else
@@ -257,7 +176,7 @@ void inputMonitorTask(void *param)
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("E");
-                lcd.setCursor(numArrowTuner,0);
+                lcd.setCursor(numArrowTuner, 0);
                 lcd.print("<");
                 lcd.setCursor(2, 0);
                 lcd.print("A");
@@ -271,16 +190,18 @@ void inputMonitorTask(void *param)
                 lcd.print("E");
                 pageState *= -1;
             }
-            else if(joystickX == 0 && pageState == 1){
+            else if (joystickX == 0 && pageState == 1)
+            {
                 numArrowTuner -= 2;
                 delay(1000 / 2);
-                if(numArrowTuner <= 1){
+                if (numArrowTuner <= 1)
+                {
                     numArrowTuner = 1;
                 }
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("E");
-                lcd.setCursor(numArrowTuner,0);
+                lcd.setCursor(numArrowTuner, 0);
                 lcd.print("<");
                 lcd.setCursor(2, 0);
                 lcd.print("A");
@@ -293,16 +214,18 @@ void inputMonitorTask(void *param)
                 lcd.setCursor(10, 0);
                 lcd.print("E");
             }
-            else if(joystickX >= 4000 && pageState == 1){
+            else if (joystickX >= 4000 && pageState == 1)
+            {
                 numArrowTuner += 2;
                 delay(1000 / 2);
-                if(numArrowTuner >= 11){
+                if (numArrowTuner >= 11)
+                {
                     numArrowTuner = 11;
                 }
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("E");
-                lcd.setCursor(numArrowTuner,0);
+                lcd.setCursor(numArrowTuner, 0);
                 lcd.print("<");
                 lcd.setCursor(2, 0);
                 lcd.print("A");
@@ -329,32 +252,126 @@ void inputMonitorTask(void *param)
 
             if (joystickState == 1 && pageState == -1)
                 toggleMetronomeState();
-            else if(joystickState == 1 && pageState == 1){
-                //ให้เรียกใช้Tuner ตาม numArrowTuner ที่ชี้อยู่
-                if(numArrowTuner == 1){
-                    tuner->playPitch(0);
-                }
-                else if (numArrowTuner == 3)
-                {
-                    tuner->playPitch(1);
-                }
-                else if (numArrowTuner == 5)
-                {
-                    tuner->playPitch(2);
-                }
-                else if (numArrowTuner == 7)
-                {
-                    tuner->playPitch(3);
-                }
-                else if (numArrowTuner == 9)
-                {
-                    tuner->playPitch(4);
-                }
-                else if (numArrowTuner == 11)
-                {
-                    tuner->playPitch(5);
-                }
+            else if (joystickState == 1 && pageState == 1)
+            {
+                playTuner();
             }
         }
     }
+}
+
+void toggleMetronomeState()
+{
+    Serial.println(metronomeState);
+    metronomeState *= -1;
+}
+
+void increaseMetronomeTempo()
+{
+    metronome->setTempo(metronome->getTempo() + 1);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("[");
+    lcd.setCursor(1, 0);
+    lcd.print(metronome->getTempo());
+    lcd.setCursor(4, 0);
+    lcd.print("]");
+    lcd.setCursor(6, 0);
+    lcd.print("PLAYING");
+    delay(543);
+    Serial.printf("Metronome tempo ++: %d\n", metronome->getTempo());
+}
+
+void decreaseMetronomeTempo()
+{
+    metronome->setTempo(metronome->getTempo() - 1);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("[");
+    lcd.setCursor(1, 0);
+    lcd.print(metronome->getTempo());
+    lcd.setCursor(4, 0);
+    lcd.print("]");
+    lcd.setCursor(6, 0);
+    lcd.print("PLAYING");
+    delay(543);
+    Serial.printf("Metronome tempo --: %d\n", metronome->getTempo());
+}
+
+void playTuner()
+{
+    // ให้เรียกใช้Tuner ตาม numArrowTuner ที่ชี้อยู่
+    if (numArrowTuner == 1)
+    {
+        tuner->playPitch(0);
+    }
+    else if (numArrowTuner == 3)
+    {
+        tuner->playPitch(1);
+    }
+    else if (numArrowTuner == 5)
+    {
+        tuner->playPitch(2);
+    }
+    else if (numArrowTuner == 7)
+    {
+        tuner->playPitch(3);
+    }
+    else if (numArrowTuner == 9)
+    {
+        tuner->playPitch(4);
+    }
+    else if (numArrowTuner == 11)
+    {
+        tuner->playPitch(5);
+    }
+}
+
+/*
+  Since OkButton is READ_WRITE variable, onOkButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onOkButtonChange()
+{
+    // Add your code here to act upon OkButton change
+    if (pageState == -1)
+        toggleMetronomeState();
+    else if (pageState == 1)
+        playTuner();
+}
+/*
+  Since UpButton is READ_WRITE variable, onUpButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onUpButtonChange()
+{
+    // Add your code here to act upon UpButton change
+}
+/*
+  Since DownButton is READ_WRITE variable, onDownButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onDownButtonChange()
+{
+    // Add your code here to act upon DownButton change
+}
+/*
+  Since LeftButton is READ_WRITE variable, onLeftButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onLeftButtonChange()
+{
+    // Add your code here to act upon LeftButton change
+    if (pageState == -1)
+        decreaseMetronomeTempo();
+}
+/*
+  Since RightButton is READ_WRITE variable, onRightButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onRightButtonChange()
+{
+    // Add your code here to act upon RightButton change
+    if (pageState == -1)
+        increaseMetronomeTempo();
 }
