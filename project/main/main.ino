@@ -77,6 +77,10 @@ int lastJoystickState = 1;
 unsigned long lastJoystickDebounceTime = millis();
 
 int metronomeState = -1;
+
+// pageStage
+//      1: Tuner
+//     -1: Metronome
 int pageState = -1;
 int numArrowTuner = 1;
 
@@ -269,6 +273,7 @@ void inputMonitorTask(void *param)
             }
             else if(joystickX == 0 && pageState == 1){
                 numArrowTuner -= 2;
+                delay(1000 / 2);
                 if(numArrowTuner <= 1){
                     numArrowTuner = 1;
                 }
@@ -288,8 +293,9 @@ void inputMonitorTask(void *param)
                 lcd.setCursor(10, 0);
                 lcd.print("E");
             }
-            else if(joystickY >= 4000 && pageState == 1){
+            else if(joystickX >= 4000 && pageState == 1){
                 numArrowTuner += 2;
+                delay(1000 / 2);
                 if(numArrowTuner >= 11){
                     numArrowTuner = 11;
                 }
@@ -326,27 +332,27 @@ void inputMonitorTask(void *param)
             else if(joystickState == 1 && pageState == 1){
                 //ให้เรียกใช้Tuner ตาม numArrowTuner ที่ชี้อยู่
                 if(numArrowTuner == 1){
-                    /* code */
+                    tuner->playPitch(0);
                 }
                 else if (numArrowTuner == 3)
                 {
-                    /* code */
+                    tuner->playPitch(1);
                 }
                 else if (numArrowTuner == 5)
                 {
-                    /* code */
+                    tuner->playPitch(2);
                 }
                 else if (numArrowTuner == 7)
                 {
-                    /* code */
+                    tuner->playPitch(3);
                 }
                 else if (numArrowTuner == 9)
                 {
-                    /* code */
+                    tuner->playPitch(4);
                 }
                 else if (numArrowTuner == 11)
                 {
-                    /* code */
+                    tuner->playPitch(5);
                 }
             }
         }
