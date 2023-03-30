@@ -1,8 +1,8 @@
-#include "thingProperties.h"
-
 #include <MusiciansMate.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+
+#include "thingProperties.h"
 
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
@@ -13,10 +13,8 @@
 
 #define DEBOUNCE_DELAY (unsigned long)50
 
-TaskHandle_t InputMonitor;
+TaskHandle_t BackgroundTask;
 LiquidCrystal_I2C lcd(0x27, 16, 1);
-
-bool cloudSetupDone = false;
 
 int joystickState;
 int lastJoystickState = 1;
@@ -60,10 +58,9 @@ void setup()
     // Connect to Arduino IoT Cloud
     ArduinoCloud.begin(ArduinoIoTPreferredConnection);
 
-    cloudSetupDone = true;
-
     lcd.init();
     lcd.backlight();
+    lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Musicians' Mate");
 
@@ -71,12 +68,12 @@ void setup()
     playTrack(BUZZ_PIN, jingle, DEFAULT_TEMPO);
 
     xTaskCreatePinnedToCore(
-        inputMonitorTask,
-        "inputMonitor",
+        backgroundTask,
+        "backgroundTask",
         2048,
         NULL,
         1,
-        &InputMonitor,
+        &BackgroundTask,
         0);
 
     Serial.println("Done setup");
@@ -86,13 +83,62 @@ void setup()
                                                        : -1;
 }
 
+void backgroundTask(void *param)
+{
+    while (true)
+    {
+        vTaskDelay(10);
+
+        if (metronome->getIsPlaying() == false && metronomeState > 0 && pageState == -1)
+            metronome->start();
+    }
+}
+
 void loop()
 {
-    if (cloudSetupDone)
-        ArduinoCloud.update();
+    ArduinoCloud.update();
 
-    if (metronome->getIsPlaying() == false && metronomeState > 0 && pageState == -1)
-        metronome->start();
+    // Serial.printf("X: %i\n", analogRead(A0));
+    // Serial.printf("Y: %i\n", analogRead(A3));
+    // Serial.printf("B: %i\n", digitalRead(JOYSTICK_PIN));
+
+    uint16_t joystickX = analogRead(A0);
+    uint16_t joystickY = analogRead(A3);
+
+    if (metronome->getIsPlaying() == true)
+    {
+        if (joystickX == 0)
+            decreaseMetronomeTempo();
+        else if (joystickX >= 4000)
+            increaseMetronomeTempo();
+    }
+    else
+    {
+        if (joystickY == 0 && pageState == 1)
+            switchToMetronomePage();
+        else if (joystickY >= 4000 && pageState == -1)
+            switchToTunerPage();
+        else if (joystickX == 0 && pageState == 1)
+            shiftTunerLeft();
+        else if (joystickX >= 4000 && pageState == 1)
+            shiftTunerRight();
+    }
+
+    if ((millis() - lastJoystickDebounceTime) >= DEBOUNCE_DELAY)
+    {
+        joystickState = digitalRead(JOYSTICK_PIN);
+
+        if (joystickState != lastJoystickState)
+        {
+            lastJoystickDebounceTime = millis();
+            lastJoystickState = joystickState;
+
+            if (joystickState == 1 && pageState == -1)
+                toggleMetronomeState();
+            else if (joystickState == 1 && pageState == 1)
+                playTuner();
+        }
+    }
 }
 
 bool metronomeStopObserver()
@@ -122,141 +168,6 @@ bool metronomeStopObserver()
         lcd.setCursor(6, 0);
         lcd.print("PAUSED");
         return false;
-    }
-}
-
-void inputMonitorTask(void *param)
-{
-    while (true)
-    {
-        vTaskDelay(10);
-
-        if (cloudSetupDone)
-            ArduinoCloud.update();
-
-        Serial.printf("X: %i\n", analogRead(A0));
-        Serial.printf("Y: %i\n", analogRead(A3));
-        Serial.printf("B: %i\n", digitalRead(JOYSTICK_PIN));
-
-        if (metronome->getIsPlaying() == true)
-        {
-            uint16_t joystickX = analogRead(A0);
-            uint16_t joystickY = analogRead(A3);
-
-            if (joystickX == 0)
-            {
-                decreaseMetronomeTempo();
-            }
-            else if (joystickX >= 4000)
-            {
-                increaseMetronomeTempo();
-            }
-        }
-        else
-        {
-            uint16_t joystickX = analogRead(A0);
-            uint16_t joystickY = analogRead(A3);
-
-            if (joystickY == 0 && pageState == 1)
-            {
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("[");
-                lcd.setCursor(1, 0);
-                lcd.print(metronome->getTempo());
-                lcd.setCursor(4, 0);
-                lcd.print("]");
-                lcd.setCursor(6, 0);
-                lcd.print("PAUSED");
-                pageState *= -1;
-            }
-            else if (joystickY >= 4000 && pageState == -1)
-            {
-                numArrowTuner = 1;
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("E");
-                lcd.setCursor(numArrowTuner, 0);
-                lcd.print("<");
-                lcd.setCursor(2, 0);
-                lcd.print("A");
-                lcd.setCursor(4, 0);
-                lcd.print("D");
-                lcd.setCursor(6, 0);
-                lcd.print("G");
-                lcd.setCursor(8, 0);
-                lcd.print("B");
-                lcd.setCursor(10, 0);
-                lcd.print("E");
-                pageState *= -1;
-            }
-            else if (joystickX == 0 && pageState == 1)
-            {
-                numArrowTuner -= 2;
-                delay(1000 / 2);
-                if (numArrowTuner <= 1)
-                {
-                    numArrowTuner = 1;
-                }
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("E");
-                lcd.setCursor(numArrowTuner, 0);
-                lcd.print("<");
-                lcd.setCursor(2, 0);
-                lcd.print("A");
-                lcd.setCursor(4, 0);
-                lcd.print("D");
-                lcd.setCursor(6, 0);
-                lcd.print("G");
-                lcd.setCursor(8, 0);
-                lcd.print("B");
-                lcd.setCursor(10, 0);
-                lcd.print("E");
-            }
-            else if (joystickX >= 4000 && pageState == 1)
-            {
-                numArrowTuner += 2;
-                delay(1000 / 2);
-                if (numArrowTuner >= 11)
-                {
-                    numArrowTuner = 11;
-                }
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("E");
-                lcd.setCursor(numArrowTuner, 0);
-                lcd.print("<");
-                lcd.setCursor(2, 0);
-                lcd.print("A");
-                lcd.setCursor(4, 0);
-                lcd.print("D");
-                lcd.setCursor(6, 0);
-                lcd.print("G");
-                lcd.setCursor(8, 0);
-                lcd.print("B");
-                lcd.setCursor(10, 0);
-                lcd.print("E");
-            }
-        }
-
-        if ((millis() - lastJoystickDebounceTime) < DEBOUNCE_DELAY)
-            continue;
-
-        joystickState = digitalRead(JOYSTICK_PIN);
-
-        if (joystickState != lastJoystickState)
-        {
-            lastJoystickDebounceTime = millis();
-            lastJoystickState = joystickState;
-
-            if (joystickState == 1 && pageState == -1)
-                toggleMetronomeState();
-            else if (joystickState == 1 && pageState == 1)
-            {
-                playTuner();
-            }
-        }
     }
 }
 
@@ -327,6 +238,91 @@ void playTuner()
     }
 }
 
+void switchToMetronomePage()
+{
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("[");
+    lcd.setCursor(1, 0);
+    lcd.print(metronome->getTempo());
+    lcd.setCursor(4, 0);
+    lcd.print("]");
+    lcd.setCursor(6, 0);
+    lcd.print("PAUSED");
+    pageState *= -1;
+}
+
+void switchToTunerPage()
+{
+    numArrowTuner = 1;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("E");
+    lcd.setCursor(numArrowTuner, 0);
+    lcd.print("<");
+    lcd.setCursor(2, 0);
+    lcd.print("A");
+    lcd.setCursor(4, 0);
+    lcd.print("D");
+    lcd.setCursor(6, 0);
+    lcd.print("G");
+    lcd.setCursor(8, 0);
+    lcd.print("B");
+    lcd.setCursor(10, 0);
+    lcd.print("E");
+    pageState *= -1;
+}
+
+void shiftTunerLeft()
+{
+    numArrowTuner -= 2;
+    delay(1000 / 2);
+    if (numArrowTuner <= 1)
+    {
+        numArrowTuner = 1;
+    }
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("E");
+    lcd.setCursor(numArrowTuner, 0);
+    lcd.print("<");
+    lcd.setCursor(2, 0);
+    lcd.print("A");
+    lcd.setCursor(4, 0);
+    lcd.print("D");
+    lcd.setCursor(6, 0);
+    lcd.print("G");
+    lcd.setCursor(8, 0);
+    lcd.print("B");
+    lcd.setCursor(10, 0);
+    lcd.print("E");
+}
+
+void shiftTunerRight()
+{
+    numArrowTuner += 2;
+    delay(1000 / 2);
+    if (numArrowTuner >= 11)
+    {
+        numArrowTuner = 11;
+    }
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("E");
+    lcd.setCursor(numArrowTuner, 0);
+    lcd.print("<");
+    lcd.setCursor(2, 0);
+    lcd.print("A");
+    lcd.setCursor(4, 0);
+    lcd.print("D");
+    lcd.setCursor(6, 0);
+    lcd.print("G");
+    lcd.setCursor(8, 0);
+    lcd.print("B");
+    lcd.setCursor(10, 0);
+    lcd.print("E");
+}
+
 /*
   Since OkButton is READ_WRITE variable, onOkButtonChange() is
   executed every time a new value is received from IoT Cloud.
@@ -334,6 +330,10 @@ void playTuner()
 void onOkButtonChange()
 {
     // Add your code here to act upon OkButton change
+    if (okButton == false)
+        return;
+
+    Serial.println("okButton hit");
     if (pageState == -1)
         toggleMetronomeState();
     else if (pageState == 1)
@@ -346,6 +346,13 @@ void onOkButtonChange()
 void onUpButtonChange()
 {
     // Add your code here to act upon UpButton change
+    if (upButton == false)
+        return;
+
+    Serial.println("upButton hit");
+
+    if (pageState == 1)
+        switchToMetronomePage();
 }
 /*
   Since DownButton is READ_WRITE variable, onDownButtonChange() is
@@ -354,6 +361,13 @@ void onUpButtonChange()
 void onDownButtonChange()
 {
     // Add your code here to act upon DownButton change
+    if (downButton == false)
+        return;
+
+    Serial.println("downButton hit");
+
+    if (pageState == -1)
+        switchToTunerPage();
 }
 /*
   Since LeftButton is READ_WRITE variable, onLeftButtonChange() is
@@ -362,8 +376,15 @@ void onDownButtonChange()
 void onLeftButtonChange()
 {
     // Add your code here to act upon LeftButton change
-    if (pageState == -1)
+    if (leftButton == false)
+        return;
+
+    Serial.println("leftButton hit");
+
+    if (pageState == -1 && metronome->getIsPlaying() == true)
         decreaseMetronomeTempo();
+    else if (pageState == 1)
+        shiftTunerLeft();
 }
 /*
   Since RightButton is READ_WRITE variable, onRightButtonChange() is
@@ -372,6 +393,13 @@ void onLeftButtonChange()
 void onRightButtonChange()
 {
     // Add your code here to act upon RightButton change
-    if (pageState == -1)
+    if (rightButton == false)
+        return;
+
+    Serial.println("rightButton hit");
+
+    if (pageState == -1 && metronome->getIsPlaying() == true)
         increaseMetronomeTempo();
+    else if (pageState == 1)
+        shiftTunerRight();
 }
