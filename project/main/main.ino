@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-#include "thingProperties.h"
+#include "includes/thingProperties.h"
 
 #define BUZZ_PIN 17
 #define JOYSTICK_PIN 16
@@ -366,7 +366,7 @@ void onDownButtonChange()
 
     Serial.println("downButton hit");
 
-    if (pageState == -1)
+    if (pageState == -1 && metronome->getIsPlaying() == false)
         switchToTunerPage();
 }
 /*
