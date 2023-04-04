@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+#include "includes/Pitches.h"
 #include "includes/thingProperties.h"
 
 #define BUZZ_PIN 17

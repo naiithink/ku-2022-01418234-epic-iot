@@ -1,13 +1,3 @@
-/**
- * From <https://www.arduino.cc/en/Tutorial/BuiltInExamples/toneMelody>
- */
-
-/*************************************************
-
- * Public Constants
-
- *************************************************/
-
 #ifndef PITCHES_H
 #define PITCHES_H
 
