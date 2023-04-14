@@ -1,0 +1,3 @@
+[submodule "project/musicians-mate"]
+	path = project/musicians-mate
+	url = https://github.com/naiithink/musicians-mate.git
