@@ -4,9 +4,6 @@
 // จอ character display
 #include <LiquidCrystal_I2C.h>
 
-// เก็บเสียง โด เร มี ฟา ...
-#include "includes/Pitches.h"
-
 // เก็บตัวแปรที่ใช้กับ Arduino IoT Cloud
 #include "includes/thingProperties.h"
 
